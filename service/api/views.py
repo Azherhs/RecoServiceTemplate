@@ -1,5 +1,6 @@
 from typing import List
 
+import pandas as pd
 import yaml
 from fastapi import APIRouter, FastAPI, Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -13,6 +14,11 @@ from service.log import app_logger
 config_file = "config/config.yaml"
 with open(config_file) as f:
     config = yaml.load(f, Loader=yaml.Loader)
+
+userknn_recos_off = pd.read_csv('service/pretrained_models/my_datas.csv')
+
+popular_model_recs = [15297, 10440, 4151, 13865, 9728, 3734, 12192, 142, 2657,
+                      4880]
 
 
 class RecoResponse(BaseModel):
@@ -59,10 +65,25 @@ async def get_reco(
 
     if user_id > 10 ** 9:
         raise UserNotFoundError(error_message=f"User {user_id} not found")
-    k_recs = request.app.state.k_recs
-    if model_name == "test_model":
+
+    if model_name == "userknn_model":
+        if user_id > 962000 or len(eval(userknn_recos_off.loc[user_id, "item_id"])) != 10:
+            reco = popular_model_recs
+        else:
+            reco = eval(userknn_recos_off.loc[user_id, "item_id"])
+
+
+    elif model_name == "test_model":
+        k_recs = request.app.state.k_recs
         reco = list(range(k_recs))
-        return RecoResponse(user_id=user_id, items=reco)
+
+    elif model_name == "popular_model":
+        k_recs = request.app.state.k_recs
+        reco = popular_model_recs
+
+    else:
+        raise ModelNotFoundError(error_message=f"Model {model_name} not found")
+    return RecoResponse(user_id=user_id, items=reco)
 
 
 def add_views(app: FastAPI) -> None:
