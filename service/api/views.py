@@ -20,9 +20,9 @@ userknn_recos_off = pd.read_csv('service/pretrained_models/my_datas.csv')
 popular_model_recs = [15297, 10440, 4151, 13865, 9728, 3734, 12192, 142, 2657,
                       4880]
 
-with open('service/pretrained_models/cold_users.txt', "r", encoding="utf-8") \
-    as file:
-    cold_users = [int(line.strip()) for line in file.readlines()]
+with open('service/pretrained_models/cold_users.txt', "r",
+          encoding="utf-8") as file: cold_users = [int(line.strip()) for line
+                                                   in file.readlines()]
 
 light_fm_recos_off = \
     pd.read_csv('service/pretrained_models/lightfm_recses.csv')
