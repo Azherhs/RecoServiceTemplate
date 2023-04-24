@@ -24,8 +24,8 @@ with open('service/pretrained_models/cold_users.txt', "r", encoding="utf-8") \
     as file:
     cold_users = [int(line.strip()) for line in file.readlines()]
 
-light_fm_recos_off = pd.read_csv('service/pretrained_models/light_fm_recs.csv')
-light_fm_not_empty_users = list(light_fm_recos_off['user_id'])
+light_fm_recos_off = \
+    pd.read_csv('service/pretrained_models/lightfm_recses.csv')
 
 
 class RecoResponse(BaseModel):
@@ -73,16 +73,8 @@ async def get_reco(
     if user_id > 10 ** 9:
         raise UserNotFoundError(error_message=f"User {user_id} not found")
 
-    elif model_name == "userknn_model":
-        reco = eval(userknn_recos_off.loc[user_id, "item_id"])
-
     elif model_name == "lightfm_model":
-        if user_id in cold_users:
-            reco = popular_model_recs
-        elif user_id not in light_fm_not_empty_users:
-            reco = popular_model_recs
-        else:
-            reco = eval(light_fm_recos_off.loc[user_id, "item_id"])
+        reco = eval(light_fm_recos_off.loc[user_id, "item_id"])
 
     elif model_name == "userknn_model":
         if user_id > 962000:
