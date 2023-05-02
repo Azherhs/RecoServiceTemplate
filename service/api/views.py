@@ -20,6 +20,13 @@ userknn_recos_off = pd.read_csv('service/pretrained_models/my_datas.csv')
 popular_model_recs = [15297, 10440, 4151, 13865, 9728, 3734, 12192, 142, 2657,
                       4880]
 
+with open('service/pretrained_models/cold_users.txt', "r",
+          encoding="utf-8") as file: cold_users = [int(line.strip()) for line
+                                                   in file.readlines()]
+
+light_fm_recos_off = \
+    pd.read_csv('service/pretrained_models/lightfm_recses.csv')
+
 
 class RecoResponse(BaseModel):
     user_id: int
@@ -66,19 +73,22 @@ async def get_reco(
     if user_id > 10 ** 9:
         raise UserNotFoundError(error_message=f"User {user_id} not found")
 
-    if model_name == "userknn_model":
-        if user_id > 962000 or len(eval(userknn_recos_off.loc[user_id, "item_id"])) != 10:
+    elif model_name == "lightfm_model":
+        reco = eval(light_fm_recos_off.loc[user_id, "item_id"])
+
+    elif model_name == "userknn_model":
+        if user_id > 962000:
+            reco = popular_model_recs
+        elif len(eval(userknn_recos_off.loc[user_id, "item_id"])) != 10:
             reco = popular_model_recs
         else:
             reco = eval(userknn_recos_off.loc[user_id, "item_id"])
-
 
     elif model_name == "test_model":
         k_recs = request.app.state.k_recs
         reco = list(range(k_recs))
 
     elif model_name == "popular_model":
-        k_recs = request.app.state.k_recs
         reco = popular_model_recs
 
     else:
