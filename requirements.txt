@@ -12,3 +12,9 @@ pylint==2.8.3
 mypy==0.812
 flake8==3.9.2
 scipy==0.16
+implicit=0.6.2
+dill=0.3.6
+service=0.6.0
+gdown=4.6.0
+tqdm=4.64.1
+prometheus-fastapi-instrumentator=6.0.0
