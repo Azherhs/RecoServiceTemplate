@@ -1,5 +1,6 @@
 import asyncio
 from concurrent.futures.thread import ThreadPoolExecutor
+from prometheus_fastapi_instrumentator import Instrumentator
 from typing import Any, Dict
 
 # import uvloop
@@ -35,6 +36,8 @@ def create_app(config: ServiceConfig) -> FastAPI:
 
     app = FastAPI(debug=False)
     app.state.k_recs = config.k_recs
+
+    Instrumentator().instrument(app).expose(app)
 
     add_views(app)
     add_middlewares(app)
